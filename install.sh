@@ -5,7 +5,7 @@
 
 brew bundle
 
-for file in .{config,editorconfig,gitconfig,gitignore,hushlogin,prettier,zshrc}; do
+for file in .{config,editorconfig,gitconfig,gitignore,hushlogin,prettierrc,zshrc}; do
 	ln -sf ~/Developer/dotfiles/$file ~/$file
 done;
 
