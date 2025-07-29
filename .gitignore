@@ -1,0 +1,5 @@
+.DS_Store
+.node-version
+.nvmrc
+Thumbs.db
+.config/oh-my-zsh/work.zsh
