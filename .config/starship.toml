@@ -1,0 +1,11 @@
+[deno]
+format = "via [$symbol($version )]($style) "
+
+[docker_context]
+format = "via [$symbol$context]($style) "
+
+[nodejs]
+format = "via [$symbol($version )]($style) "
+
+[terraform]
+format = "via [$symbol $version $workspace]($style) "
