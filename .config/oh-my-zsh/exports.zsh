@@ -11,5 +11,8 @@ export PATH=/opt/homebrew/sbin:$PATH              # Add Homebrew sbin to PATH
 # Rust
 export PATH=$HOME/.cargo/bin:$PATH                # Add Rust (cargo) binaries to PATH
 
+# Dotfiles custom scripts (symlinked to ~/.config/scripts)
+export PATH="$HOME/.config/scripts:$PATH"  # Add dotfiles scripts to PATH
+
 # Node.js project binaries
 export PATH=node_modules/.bin:$PATH               # Add local node_modules binaries to PATH
