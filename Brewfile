@@ -6,7 +6,7 @@ brew "starship"         # Cross-shell prompt
 brew "volta"            # Node.js version manager
 
 cask "discord"                  # Chat for communities and teams
-cask "firefox@developer-edition" # Firefox Developer Edition browser
+cask "firefox-developer-edition" # Firefox Developer Edition browser
 cask "font-fira-code-nerd-font" # Fira Code font with Nerd Font patches
 cask "google-chrome"            # Google Chrome browser
 cask "hiddenbar"                # Menu bar organizer
