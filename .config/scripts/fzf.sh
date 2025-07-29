@@ -1,0 +1,1 @@
+/Users/james.loveridge/Developer/dotfiles/.config/scripts/fzf.sh
