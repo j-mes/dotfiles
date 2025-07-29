@@ -96,7 +96,7 @@ This will:
 - Update and upgrade Homebrew packages and casks
 - Upgrade Mac App Store apps
 
-## Customization
+## Customisation
 Feel free to modify aliases, exports, and other configuration files to suit your workflow.
 
 ## Contributing
