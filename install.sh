@@ -60,3 +60,11 @@ if [ -d "$config_src" ]; then
 else
     echo ".config directory not found in repo. Skipping recursive symlinking."
 fi
+
+# Source exports.zsh to apply PATH changes immediately
+if [ -f "$HOME/.config/oh-my-zsh/exports.zsh" ]; then
+    echo "Sourcing $HOME/.config/oh-my-zsh/exports.zsh to update PATH..."
+    source "$HOME/.config/oh-my-zsh/exports.zsh"
+else
+    echo "exports.zsh not found. Please check your dotfiles setup."
+fi
