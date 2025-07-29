@@ -1,38 +1,47 @@
 #!/bin/zsh
+# Upgrade Script for macOS Environment
+# -------------------------------------
+# This script updates Oh My Zsh, Homebrew packages, and Mac App Store apps.
+# Run with: zsh ~/.config/upgrade.zsh
+
 source ~/.zshrc
 
-echo "# Starting upgrades…"
-echo ""
-echo "## OhMyZsh upgrade starting"
-echo "##"
-omz update
-echo "##"
-echo "## OhMyZsh upgrade done"
-echo ""
-echo ""
-echo "## NodeJS upgrades starting"
-echo "##"
-fnm uninstall 16
-fnm install 16
-fnm default 16
-n use
-echo "##"
-echo "## NodeJS upgrades done"
-echo ""
-echo ""
-echo "## Homebrew upgrades starting"
-echo "##"
-brew update
-brew upgrade
-brew upgrade --cask --greedy
-echo "##"
-echo "## Homebrew upgrades done"
-echo ""
-echo ""
-echo "## macOS upgrades starting"
-echo "##"
-mas upgrade
-echo "##"
-echo "## macOS upgrades done"
-echo ""
-echo "# Upgrades done"
+print -P "%F{cyan}%B==============================%b%f"
+print -P "%F{yellow}%B  🚀 Starting Upgrades...%b%f"
+print -P "%F{cyan}%B==============================%b%f"
+
+
+# Upgrade Oh My Zsh
+if command -v omz >/dev/null 2>&1; then
+    print -P "%F{magenta}%B→ Upgrading Oh My Zsh...%b%f"
+    omz update
+    print -P "%F{green}%B✓ Oh My Zsh upgrade complete!%b%f"
+else
+    print -P "%F{red}%B✗ omz (Oh My Zsh CLI) not found! Skipping.%b%f"
+fi
+
+
+# Upgrade Homebrew
+if command -v brew >/dev/null 2>&1; then
+    print -P "%F{magenta}%B→ Updating Homebrew...%b%f"
+    brew update
+    print -P "%F{magenta}%B→ Upgrading Homebrew packages...%b%f"
+    brew upgrade
+    print -P "%F{green}%B✓ Homebrew upgrade complete!%b%f"
+else
+    print -P "%F{red}%B✗ brew (Homebrew) not found! Skipping.%b%f"
+fi
+
+
+# Upgrade Mac App Store apps
+if command -v mas >/dev/null 2>&1; then
+    print -P "%F{magenta}%B→ Upgrading Mac App Store apps...%b%f"
+    mas upgrade
+    print -P "%F{green}%B✓ Mac App Store upgrade complete!%b%f"
+else
+    print -P "%F{red}%B✗ mas (Mac App Store CLI) not found! Skipping.%b%f"
+fi
+
+print -P "%F{cyan}%B==============================%b%f"
+print -P "%F{yellow}%B  🎉 All upgrades finished!%b%f"
+print -P "%F{cyan}%B==============================%b%f"
