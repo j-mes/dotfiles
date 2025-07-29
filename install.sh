@@ -41,3 +41,22 @@ echo "Done. $success_count files linked, $fail_count failed."
 
 # Cleanup variables
 unset file src dest success_count fail_count
+
+# Symlink contents of .config recursively
+echo "Symlinking contents of .config..."
+config_src="$PWD/.config"
+config_dest="$HOME/.config"
+if [ -d "$config_src" ]; then
+    find "$config_src" -mindepth 1 | while read -r item; do
+        rel_path="${item#$config_src/}"
+        target="$config_dest/$rel_path"
+        mkdir -p "$(dirname "$target")"
+        if ln -sf "$item" "$target"; then
+            echo "Linked $item -> $target"
+        else
+            echo "Failed to link $item"
+        fi
+    done
+else
+    echo ".config directory not found in repo. Skipping recursive symlinking."
+fi
