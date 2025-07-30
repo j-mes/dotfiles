@@ -35,6 +35,7 @@ fi
 
 echo "📦 Removing local branches tracking deleted remotes..."
 
+gone_branches=$(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1; }')
 deleted_gone_count=0
 
 if [[ -n "$gone_branches" ]]; then
