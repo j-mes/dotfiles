@@ -10,28 +10,59 @@
 
 # 🚧 Guard: Exit if not in a Git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-  echo "❌ Not inside a Git repository. Aborting."
-  exit 1
+	echo "❌ Not inside a Git repository. Aborting."
+	exit 1
 fi
 
 # 🔄 Fetch from remote and prune deleted remote-tracking branches
 echo "🔄 Fetching and pruning remote branches..."
-git fetch --prune
 
-# 🗑️ Remove local branches tracking deleted remote branches
-# - 'git branch -vv' lists branches with upstream info
-# - 'grep : gone]' filters branches with deleted upstreams
-# - 'grep -v "\*"' excludes the currently checked out branch
-# - 'awk' extracts the branch name (first column)
-# - 'xargs -r git branch -d' deletes each safely
-echo "🗑️ Removing local branches tracking deleted remotes..."
-git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1; }' | xargs -r git branch -d
+prune_output=$(git fetch --prune 2>&1)
+pruned_branches=$(echo "$prune_output" | grep -E ' \[pruned\]' | awk '{print $2}')
+
+if [[ -n "$pruned_branches" ]]; then
+	echo "Pruned remote-tracking branches:"
+	echo "$pruned_branches"
+else
+	echo "🔍 No remote-tracking branches pruned."
+fi
+
+pruned_count=$(echo "$pruned_branches" | wc -l | tr -d ' ')
+
+echo "📦 Removing local branches tracking deleted remotes..."
+
+deleted_gone_count=0
+
+if [[ -n "$gone_branches" ]]; then
+	echo "Deleting local branches tracking deleted remotes:"
+
+	for branch in $gone_branches; do
+		echo "  $branch"
+		git branch -d "$branch" && ((deleted_gone_count++))
+	done
+else
+	echo "🔍 No local branches tracking deleted remotes found."
+fi
 
 # ✅ Delete local branches already merged into 'main'
-# - 'git branch --merged main' shows fully merged branches
-# - 'grep -v main' ensures we don't delete 'main' itself
-# - 'xargs -r git branch -d' deletes each safely
 echo "✅ Deleting branches already merged into 'main'..."
-git branch --merged main | grep -v '^[ *]*main$' | xargs -r git branch -d
 
-echo "🎉 Git cleanup completed."
+merged_branches=$(git branch --merged main | grep -v '^[ *]*main$')
+
+deleted_merged_count=0
+
+if [[ -n "$merged_branches" ]]; then
+	echo "Deleting local branches already merged into 'main':"
+
+	for branch in $merged_branches; do
+		echo "  $branch"
+		git branch -d "$branch" && ((deleted_merged_count++))
+	done
+else
+	echo "🔍 No local branches already merged into 'main' found."
+fi
+
+# 📊 Summary
+echo ""
+echo "📦 $deleted_gone_count | 🔄 $pruned_count | ✅ $deleted_merged_count"
+echo "🎉 Total cleaned: $((pruned_count + deleted_gone_count + deleted_merged_count))"
