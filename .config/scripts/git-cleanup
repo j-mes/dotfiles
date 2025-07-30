@@ -27,7 +27,11 @@ else
 	echo "🔍 No remote-tracking branches pruned."
 fi
 
-pruned_count=$(echo "$pruned_branches" | wc -l | tr -d ' ')
+if [[ -n "$pruned_branches" ]]; then
+    pruned_count=$(echo "$pruned_branches" | wc -l | tr -d ' ')
+else
+    pruned_count=0
+fi
 
 echo "📦 Removing local branches tracking deleted remotes..."
 
