@@ -33,6 +33,7 @@ else
     pruned_count=0
 fi
 
+# 📦 Remove local branches tracking deleted remotes
 echo "📦 Removing local branches tracking deleted remotes…"
 
 gone_branches=$(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1; }')
