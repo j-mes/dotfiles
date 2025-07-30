@@ -15,7 +15,7 @@ if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
 fi
 
 # 🔄 Fetch from remote and prune deleted remote-tracking branches
-echo "🔄 Fetching and pruning remote branches..."
+echo "🔄 Fetching and pruning remote branches…"
 
 prune_output=$(git fetch --prune 2>&1)
 pruned_branches=$(echo "$prune_output" | grep -E ' \[pruned\]' | awk '{print $2}')
@@ -33,7 +33,7 @@ else
     pruned_count=0
 fi
 
-echo "📦 Removing local branches tracking deleted remotes..."
+echo "📦 Removing local branches tracking deleted remotes…"
 
 gone_branches=$(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1; }')
 deleted_gone_count=0
@@ -50,10 +50,9 @@ else
 fi
 
 # ✅ Delete local branches already merged into 'main'
-echo "✅ Deleting branches already merged into 'main'..."
+echo "✅ Deleting branches already merged into 'main'…"
 
 merged_branches=$(git branch --merged main | grep -v '^[ *]*main$')
-
 deleted_merged_count=0
 
 if [[ -n "$merged_branches" ]]; then
