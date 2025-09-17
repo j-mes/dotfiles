@@ -91,12 +91,7 @@ sed -i '' 's/Your Name/Your Real Name/' ~/.gitconfig
 ```
 
 Then edit further as needed.
-Note: `.gitconfig` itself is intentionally ignored via `.gitignore` to prevent committing personal identity/signing details. Use the template as a base and keep any private or machine‑specific overrides in an untracked `~/.gitconfig.local` included with:
-
-```ini
-[include]
-   path = ~/.gitconfig.local
-```
+Note: `.gitconfig` is intentionally ignored via `.gitignore` to prevent committing personal identity/signing details. Use the example as a base; maintain your personal `~/.gitconfig` directly (no auxiliary local include file is used by design).
 
 ### .editorconfig
 
