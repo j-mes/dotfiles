@@ -68,8 +68,15 @@ else
     echo "exports.zsh not found. Please check your dotfiles setup."
 fi
 
-# Git config template: copy example if user does not already have one
-if [ ! -f "$HOME/.gitconfig" ] && [ -f "$PWD/.gitconfig.example" ]; then
+# Git config template handling
+# Only create ~/.gitconfig from example if none exists. Never overwrite an existing file.
+if [ -f "$HOME/.gitconfig" ]; then
+    echo "Skipping git config template: ~/.gitconfig already exists (left untouched)."
+elif [ -L "$HOME/.gitconfig" ]; then
+    echo "NOTE: ~/.gitconfig is a symlink; not replacing."
+elif [ -f "$PWD/.gitconfig.example" ]; then
     cp "$PWD/.gitconfig.example" "$HOME/.gitconfig"
-    echo "Created ~/.gitconfig from template (.gitconfig.example). Please edit your name/email."
+    echo "Created ~/.gitconfig from template (.gitconfig.example). Edit your name/email & signing key." 
+else
+    echo "No .gitconfig.example found; skipping git config setup."
 fi

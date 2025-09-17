@@ -91,38 +91,7 @@ sed -i '' 's/Your Name/Your Real Name/' ~/.gitconfig
 ```
 
 Then edit further as needed.
-
-#### Verifying `.gitconfig` is no longer tracked
-
-Before committing the removal (you should see the staged deletion line):
-
-```sh
-git status --short | grep '^D  \.gitconfig' && echo '.gitconfig staged for deletion'
-```
-
-After committing (should report not tracked):
-
-```sh
-git ls-files --error-unmatch .gitconfig 2>/dev/null || echo '.gitconfig not tracked ✅'
-```
-
-Confirm the deletion exists in the most recent commit diff (after commit):
-
-```sh
-git show --name-status --oneline -1 | grep '^D\s\+\.gitconfig' && echo 'Deletion recorded in last commit'
-```
-
-If you accidentally re-add it:
-
-```sh
-git restore --staged .gitconfig && echo 'Unstaged .gitconfig' && git update-index --assume-unchanged .gitconfig
-```
-
-Or just remove it from the index again:
-
-```sh
-git rm --cached .gitconfig
-```
+Note: `.gitconfig` is intentionally ignored via `.gitignore` to prevent committing personal identity/signing details. Use the example as a base; maintain your personal `~/.gitconfig` directly (no auxiliary local include file is used by design).
 
 ### .editorconfig
 
