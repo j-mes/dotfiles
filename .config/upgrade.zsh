@@ -1,8 +1,11 @@
 #!/bin/zsh
-# Upgrade Script for macOS Environment
-# -------------------------------------
-# This script updates Oh My Zsh, Homebrew packages, and Mac App Store apps.
-# Run with: zsh ~/.config/upgrade.zsh
+# ---------------------------------------------------------------------------
+# upgrade.zsh
+# Purpose: Update shell framework (Oh My Zsh), Homebrew formulae/casks, and
+# Mac App Store apps in one go.
+# Usage: Run via alias `upgrade` or: zsh ~/.config/upgrade.zsh
+# Output: Colorized progress + success/failure summaries.
+# ---------------------------------------------------------------------------
 
 source ~/.zshrc
 
