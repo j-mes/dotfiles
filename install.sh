@@ -22,7 +22,7 @@ fi
 echo "Symlinking dotfiles..."
 success_count=0
 fail_count=0
-for file in .{config,editorconfig,gitconfig,gitignore,hushlogin,prettierrc,zshrc}; do
+for file in .{config,editorconfig,gitignore,hushlogin,prettierrc,zshrc}; do
     src="$PWD/$file"      # Source file in repo
     dest="$HOME/$file"    # Destination in home directory
     # Create symlink, overwrite if exists
@@ -66,4 +66,10 @@ if [ -f "$HOME/.config/oh-my-zsh/exports.zsh" ]; then
     source "$HOME/.config/oh-my-zsh/exports.zsh"
 else
     echo "exports.zsh not found. Please check your dotfiles setup."
+fi
+
+# Git config template: copy example if user does not already have one
+if [ ! -f "$HOME/.gitconfig" ] && [ -f "$PWD/.gitconfig.example" ]; then
+    cp "$PWD/.gitconfig.example" "$HOME/.gitconfig"
+    echo "Created ~/.gitconfig from template (.gitconfig.example). Please edit your name/email."
 fi

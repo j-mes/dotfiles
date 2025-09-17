@@ -35,11 +35,11 @@ A comprehensive, well-documented set of configuration files and scripts for sett
     This will create symbolic links for:
     - `.config`
     - `.editorconfig`
-    - `.gitconfig`
     - `.gitignore`
     - `.hushlogin`
     - `.prettierrc`
     - `.zshrc`
+      (Your personal `.gitconfig` is no longer tracked; a template is provided.)
 
 ## File Overview
 
@@ -74,14 +74,55 @@ Configures Zsh with:
 -   Volta for Node.js version management
 -   Loads custom aliases and exports
 
-### .gitconfig
+### .gitconfig.example
 
-Git configuration with:
+Template Git configuration (the real `~/.gitconfig` is not tracked to avoid leaking personal info). It includes:
 
--   User info and SSH signing
--   Editor setup
--   Useful aliases (`cleanup`, `branches`, `who`)
--   Push and pull defaults
+-   Alias examples (`cleanup`, `branches`, `who`)
+-   SSH commit signing setup using `gpg.format = ssh`
+-   `autoSetupRemote` and fast‑forward only pulls
+
+Usage:
+
+```sh
+cp .gitconfig.example ~/.gitconfig
+sed -i '' 's/you@example.com/you@yourdomain.com/' ~/.gitconfig
+sed -i '' 's/Your Name/Your Real Name/' ~/.gitconfig
+```
+
+Then edit further as needed.
+
+#### Verifying `.gitconfig` is no longer tracked
+
+Before committing the removal (you should see the staged deletion line):
+
+```sh
+git status --short | grep '^D  \.gitconfig' && echo '.gitconfig staged for deletion'
+```
+
+After committing (should report not tracked):
+
+```sh
+git ls-files --error-unmatch .gitconfig 2>/dev/null || echo '.gitconfig not tracked ✅'
+```
+
+Confirm the deletion exists in the most recent commit diff (after commit):
+
+```sh
+git show --name-status --oneline -1 | grep '^D\s\+\.gitconfig' && echo 'Deletion recorded in last commit'
+```
+
+If you accidentally re-add it:
+
+```sh
+git restore --staged .gitconfig && echo 'Unstaged .gitconfig' && git update-index --assume-unchanged .gitconfig
+```
+
+Or just remove it from the index again:
+
+```sh
+git rm --cached .gitconfig
+```
 
 ### .editorconfig
 
