@@ -1,7 +1,7 @@
 [user]
-	email =
-	name =
-	signingkey = 
+	email = james.loveridge@ft.com
+	name = James Loveridge
+	signingKey = AAAAC3NzaC1lZDI1NTE5AAAAIBnFKvIZGZIOQjG0ALqjFmHM45sl4yuob/ekBXhJhW6V
 [core]
 	editor = code --wait
 	excludesFile = ~/.gitignore
@@ -14,7 +14,7 @@
 [gpg]
 	format = ssh
 [ssh]
-	signingkey = 
+	signingKey = AAAAC3NzaC1lZDI1NTE5AAAAIBnFKvIZGZIOQjG0ALqjFmHM45sl4yuob/ekBXhJhW6V
 [pull]
 	ff = only
 [init]

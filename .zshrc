@@ -1,25 +1,33 @@
-############################################################
-# Zsh Configuration File
-# Loads Oh My Zsh, plugins, themes, and custom tools
-############################################################
+#!/bin/zsh
+# ---------------------------------------------------------------------------
+# Zsh Configuration
+# Loads Oh My Zsh, plugins, prompt, fuzzy finder, environment exports, and
+# optional machine / private overrides. Keep this file lean; put logic into
+# dedicated files under .config/oh-my-zsh/.
+# ---------------------------------------------------------------------------
 
-# Set Oh My Zsh directory
+# Core paths / locations
 export ZSH=~/.oh-my-zsh
-# Set custom Oh My Zsh config directory
 ZSH_CUSTOM=~/.config/oh-my-zsh
-# Set Zsh theme
+# Theme & plugin selection
 ZSH_THEME="robbyrussell"
 # Enable plugins
 plugins=(git)
 
-# Load Oh My Zsh
+# Machine-specific / optional integrations (VS Code, host tweaks, etc.)
+[ -f "$ZSH_CUSTOM/machine.zsh" ] && source "$ZSH_CUSTOM/machine.zsh"
+
+# Framework & prompt
 source $ZSH/oh-my-zsh.sh
 
-# Initialize Starship prompt
+# Starship prompt (fast, configurable)
 eval "$(starship init zsh)"
 
-# Load fzf key bindings and completion if installed
+# fzf integration (key bindings + completion)
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Load custom environment variable exports
+# Environment exports (PATH, toolchain managers, etc.)
 [ -f "$ZSH_CUSTOM/exports.zsh" ] && source "$ZSH_CUSTOM/exports.zsh"
+
+# Private / untracked overrides (git-ignored)
+[ -f "$ZSH_CUSTOM/work.zsh" ] && source "$ZSH_CUSTOM/work.zsh"
