@@ -1,0 +1,19 @@
+
+# VS Code extensions for personal machines (merged example + current work list)
+astro-build.astro-vscode
+dbaeumer.vscode-eslint
+esbenp.prettier-vscode
+figma.figma-vscode-extension
+gael-lopes-da-silva.colored
+ms-python.python
+ms-vscode.cpptools
+ms-vscode.powershell
+ms-vscode.vscode-typescript-next
+github.copilot
+github.copilot-chat
+github.github-vscode-theme
+mechatroner.rainbow-csv
+oderwat.indent-rainbow
+streetsidesoftware.code-spell-checker
+unifiedjs.vscode-mdx
+vunguyentuan.vscode-css-variables

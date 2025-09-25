@@ -1,0 +1,14 @@
+# VS Code extensions for work machines (exported from this machine)
+astro-build.astro-vscode
+dbaeumer.vscode-eslint
+esbenp.prettier-vscode
+figma.figma-vscode-extension
+gael-lopes-da-silva.colored
+github.copilot
+github.copilot-chat
+github.github-vscode-theme
+mechatroner.rainbow-csv
+oderwat.indent-rainbow
+streetsidesoftware.code-spell-checker
+unifiedjs.vscode-mdx
+vunguyentuan.vscode-css-variables

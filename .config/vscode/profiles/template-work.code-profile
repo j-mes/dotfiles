@@ -1,0 +1,13 @@
+{
+    "name": "Work",
+    "settings": {
+        "workbench.colorTheme": "Default Dark+",
+        "editor.formatOnSave": true
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode"
+        ]
+    }
+}

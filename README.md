@@ -25,14 +25,61 @@ A comprehensive, well-documented set of configuration files and scripts for sett
     cd ~/Developer/dotfiles
     ```
 2. **Install Homebrew packages and casks:**
+   There are two Brewfiles included so you can keep personal and work machines separate. They live under
+   `.config/homebrew/` in the repo:
+
+    - `.config/homebrew/Brewfile.personal` — personal laptop defaults (includes apps like Discord, ProtonVPN)
+    - `.config/homebrew/Brewfile.work` — work laptop defaults (excludes some personal apps)
+
+    You can run a bundle directly, for example:
+
     ```sh
-    brew bundle --file=Brewfile
+    brew bundle --file=.config/homebrew/Brewfile.personal
+    # or
+    brew bundle --file=.config/homebrew/Brewfile.work
     ```
-3. **Symlink dotfiles to your home directory:**
+
+3. **Symlink dotfiles to your home directory and (optionally) install apps:**
+
     ```sh
     ./install.sh
     ```
+
+    `install.sh` can now be driven either interactively or via flags/env vars. Usage examples:
+
+    - Interactive (prompts for profile and whether to run brew bundle):
+
+    ```sh
+    ./install.sh
+    ```
+
+    - Non-interactive using env var to choose profile (will skip brew bundle unless `--auto-brew` is used):
+
+    ```sh
+    DOTFILES_PROFILE=work ./install.sh
+    ```
+
+    - Non-interactive and auto-run brew bundle for chosen profile:
+
+    ```sh
+    ./install.sh --profile=work --auto-brew
+    ```
+
+    Flags supported:
+
+    - `--profile=personal|work` — select profile explicitly (overrides `DOTFILES_PROFILE`)
+    - `--auto-brew` — automatically run `brew bundle --file=.config/homebrew/Brewfile.<profile>` without prompting
+    - `--no-brew` — explicitly skip brew bundle
+    - `--install-vscode-extensions` — install VS Code extensions listed in `.config/vscode/extensions-<profile>.txt`
+    - `--yes` — non-interactive shortcut that implies `--auto-brew` and `--install-vscode-extensions`
+
+    If a matching Brewfile isn't present under `.config/homebrew/`, the script will skip the bundle step and continue with symlinking.
+
+    VS Code: there's a `.config/vscode/` folder for keeping VS Code profiles and per-profile extension lists. Use `--install-vscode-extensions` to have `install.sh` automatically install extension lists.
+
+    A small helper is provided at `.config/vscode/import-profile.sh` to open a template `.code-profile` file in VS Code and remind you how to import it via the Command Palette. Importing profiles into VS Code remains a manual UI action.
     This will create symbolic links for:
+
     - `.config`
     - `.editorconfig`
     - `.gitignore`
