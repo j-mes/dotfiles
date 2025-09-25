@@ -2,6 +2,8 @@
 # ---------------------------------------------------------------------------
 # install.sh
 # Purpose: Symlink dotfiles & .config contents into $HOME after cloning.
+#           Added: supports machine profile selection (personal/work) and
+#           optional Homebrew bundle per-profile.
 # Prereqs: Homebrew, Oh My Zsh installed. Existing dotfiles will be replaced.
 # Safety: Uses ln -sf (force) – ensure you have backups if needed.
 # ---------------------------------------------------------------------------
@@ -17,6 +19,77 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Error: Oh My Zsh is not installed. Please install Oh My Zsh first."
     exit 1
 fi
+
+# --- CLI flags & Profile selection ----------------------------------------
+# Supports:
+#   --profile=<personal|work>   (or set DOTFILES_PROFILE env var)
+#   --auto-brew                 (automatically run brew bundle non-interactively)
+#   --no-brew                   (skip brew bundle)
+
+DEFAULT_PROFILE="personal"
+PROFILE="${DOTFILES_PROFILE:-}"
+AUTO_BREW="no"
+
+INSTALL_VSCODE_EXTS="no"
+
+# Simple argv parsing for supported flags
+for arg in "$@"; do
+    case "$arg" in
+        --profile=*) PROFILE="${arg#*=}" ;;
+        --auto-brew) AUTO_BREW="yes" ;;
+        --install-vscode-extensions) INSTALL_VSCODE_EXTS="yes" ;;
+        --yes) AUTO_BREW="yes"; INSTALL_VSCODE_EXTS="yes" ;;
+        --no-brew) AUTO_BREW="no" ;;
+        --help|-h)
+            echo "Usage: $0 [--profile=personal|work] [--auto-brew|--no-brew] [--install-vscode-extensions] [--yes]"
+            exit 0
+            ;;
+    esac
+done
+
+# If PROFILE still empty and running interactively, prompt the user
+if [ -z "$PROFILE" ] && [ -t 0 ]; then
+    echo "Which profile are you installing for?"
+    echo "  1) personal (default)"
+    echo "  2) work"
+    printf "Enter choice [1/2]: "
+    read -r choice
+    case "$choice" in
+        2) PROFILE="work" ;;
+        1|"" ) PROFILE="personal" ;;
+        *) echo "Unrecognized choice, defaulting to personal."; PROFILE="personal" ;;
+    esac
+fi
+
+# Final default
+PROFILE="${PROFILE:-$DEFAULT_PROFILE}"
+echo "Selected profile: $PROFILE"
+
+# Brewfile path now lives under .config/homebrew
+BREWFILE_PATH="$PWD/.config/homebrew/Brewfile.$PROFILE"
+if [ -f "$BREWFILE_PATH" ]; then
+    if [ "$AUTO_BREW" = "yes" ]; then
+        echo "Auto-running: brew bundle --file=$BREWFILE_PATH"
+        brew bundle --file="$BREWFILE_PATH"
+    else
+        if [ -t 0 ]; then
+            printf "Run Homebrew bundle using %s? [Y/n]: " "$BREWFILE_PATH"
+            read -r run_bundle
+            case "$run_bundle" in
+                [Yy]|"" )
+                    echo "Running: brew bundle --file=$BREWFILE_PATH"
+                    brew bundle --file="$BREWFILE_PATH"
+                    ;;
+                *) echo "Skipping Homebrew bundle for $PROFILE profile." ;;
+            esac
+        else
+            echo "Non-interactive shell and --auto-brew not set; skipping Homebrew bundle for $PROFILE."
+        fi
+    fi
+else
+    echo "No Brewfile found for profile '$PROFILE' at $BREWFILE_PATH. Skipping brew bundle."
+fi
+
 
 # Phase 1: Symlink top-level dotfiles
 echo "Symlinking dotfiles..."
@@ -79,4 +152,21 @@ elif [ -f "$PWD/.gitconfig.example" ]; then
     echo "Created ~/.gitconfig from template (.gitconfig.example). Edit your name/email & signing key." 
 else
     echo "No .gitconfig.example found; skipping git config setup."
+fi
+
+# --- VS Code extensions installation --------------------------------------
+VSCODE_EXT_FILE="$PWD/.config/vscode/extensions-$PROFILE.txt"
+if [ "$INSTALL_VSCODE_EXTS" = "yes" ]; then
+    if ! command -v code >/dev/null 2>&1; then
+        echo "VS Code CLI 'code' not found in PATH; skipping extensions installation."
+    elif [ -f "$VSCODE_EXT_FILE" ]; then
+        echo "Installing VS Code extensions from $VSCODE_EXT_FILE"
+        # Install each extension listed (ignore empty lines and comments)
+        grep -v -E '^\s*(#|$)' "$VSCODE_EXT_FILE" | while read -r ext; do
+            echo "Installing extension: $ext"
+            code --install-extension "$ext" || echo "Failed to install $ext"
+        done
+    else
+        echo "No VS Code extensions file found for profile at $VSCODE_EXT_FILE. Skipping."
+    fi
 fi
