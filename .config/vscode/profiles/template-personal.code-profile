@@ -1,0 +1,13 @@
+{
+    "name": "Personal",
+    "settings": {
+        "workbench.colorTheme": "Default Light+",
+        "editor.formatOnSave": false
+    },
+    "extensions": {
+        "recommendations": [
+            "esbenp.prettier-vscode",
+            "mechatroner.rainbow-csv"
+        ]
+    }
+}
