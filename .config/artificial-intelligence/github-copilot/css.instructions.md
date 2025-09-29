@@ -105,11 +105,7 @@ applyTo: '**/*.css'
     -   `components/` — component styles, co-located where appropriate
     -   `utilities/` — helper classes (very small, well-documented)
 
-## Append — CSS guidance: light-dark(), prefers-color-scheme, WCAG tokens, and reduced motion
-
-This fragment is intended to be appended to this `css.instructions.md` (or merged in) to standardise how we handle light/dark colour switching, accessibility tokens and reduced-motion preferences.
-
-### Use the light-dark() convenience function (preferred)
+## Use the light-dark() convenience function (preferred)
 
 -   Author tokens using the `light-dark()` CSS colour function as the canonical value where a token should resolve to distinct light and dark colours. Treat `light-dark()` as the primary authoring approach: tokens in `tokens.css` should use `light-dark()` so supporting user agents pick the correct value automatically.
 
@@ -130,7 +126,7 @@ Notes:
 -   If you must support very old browsers, provide a single minimal fallback (for example a `--*-fallback` token) or use a small `@media (prefers-color-scheme: dark)` override only where necessary as progressive enhancement.
 -   Verify the exact `light-dark()` syntax and current support on MDN; consider adding a quick test/visual check in your CI to detect regressions.
 
-### Use prefers-color-scheme to scope tokens
+## Use prefers-color-scheme to scope tokens
 
 -   Use `@media (prefers-color-scheme: dark)` to switch token values for dark mode. Keep tokens semantic (surface, text, border, accent) rather than ad-hoc colour names.
 
@@ -157,7 +153,7 @@ Example — semantic tokens:
 -   Keep token names stable across themes; only the values change.
 -   Prefer using tokens in your components (for example: `background: var(--bg-surface); color: var(--text-primary);`).
 
-### WCAG design tokens and contrast guidance
+## WCAG design tokens and contrast guidance
 
 -   Create tokens that map to WCAG intent, for example:
 
@@ -201,7 +197,7 @@ Small example token set annotated with purpose:
 }
 ```
 
-### prefers-reduced-motion — snippet
+## prefers-reduced-motion — snippet
 
 -   Respect `prefers-reduced-motion` for users who need reduced animation. Prefer to remove non-essential motion and keep meaningful motion minimal.
 
@@ -222,14 +218,6 @@ Notes:
 -   For motion that conveys information (e.g., progress), provide an alternative or ensure content remains understandable without the animation.
 
 ---
-
-Quick checklist to include with the appended instructions:
-
--   [ ] Add semantic WCAG tokens to `:root` and provide dark-mode overrides with `prefers-color-scheme`.
--   [ ] Author tokens using `light-dark()` as the default canonical value; provide minimal fallbacks for legacy UAs only when required.
--   [ ] Verify colour contrast ratios for each token pair in both schemes (automated and manual checks).
--   [ ] Add `prefers-reduced-motion` media query to the base stylesheet and test key components.
-
 References:
 
 -   MDN: search for "light-dark()" and "prefers-color-scheme" for the detailed explainer and browser support.
