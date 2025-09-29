@@ -34,6 +34,7 @@ FORCE="no"
 DRY_RUN="no"                # --dry-run avoids making changes; useful for verification
 INSTALL_VSCODE_EXTS="no"
 REPAIR_LINKS="no"           # --repair-links optionally repairs broken symlinks
+VERIFY="no"                 # --verify will run a verification report and exit
 
 # --- Parse command-line arguments ------------------------------------------
 for arg in "$@"; do
@@ -44,6 +45,7 @@ for arg in "$@"; do
     --repair-links) REPAIR_LINKS="yes" ;;                 # opt-in repair of broken symlinks
     --install-vscode-extensions) INSTALL_VSCODE_EXTS="yes" ;; # install VS Code extensions list
     --dry-run) DRY_RUN="yes" ;;                           # show actions without mutating
+    --verify) VERIFY="yes" ;;                             # run verification and exit
     --force) FORCE="yes" ;;                               # replace conflicting files without backing off
     --help|-h) usage ;;                                    # show usage
     *) ;;                                                  # ignore unknown args (future-proof)
@@ -71,13 +73,120 @@ realpath_f() { command -v realpath >/dev/null 2>&1 && realpath "$1" || (command 
 
 ## Determine repository root. Prefer the repository git top-level (if available)
 ## so the script works when invoked from subdirectories or when PWD isn't the repo root.
-script_dir="$(cd "$(dirname "${0:-$PWD}")" && pwd)"
+## Determine the directory containing this script. Support both "executed" and
+## "sourced" invocations (zsh/bash). Using $0 alone breaks when the file is
+## sourced because $0 refers to the parent shell.
+if [ -n "${BASH_SOURCE:-}" ] && [ "${BASH_SOURCE[0]}" != "" ]; then
+  script_path="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  # zsh: use %x expansion to get current script path when sourced
+  script_path="${(%):-%x}"
+else
+  script_path="${0:-$PWD}"
+fi
+[ -z "$script_path" ] && script_path="$PWD"
+script_dir="$(cd "$(dirname "$script_path")" && pwd)"
 if command -v git >/dev/null 2>&1 && git -C "$script_dir" rev-parse --show-toplevel >/dev/null 2>&1; then
   REPO_ROOT="$(git -C "$script_dir" rev-parse --show-toplevel)"
 else
   REPO_ROOT="$script_dir"
 fi
 REPO_REALPATH="$(realpath_f "$REPO_ROOT")"; HOME_REALPATH="$(realpath_f "$HOME")"
+
+## verify_links: check that top-level dotfiles and .config entries in $HOME
+## are symlinks pointing to files in the repo (or that a top-level
+## ~/.config/<top> is a symlink to repo/.config/<top>). Prints a human
+## friendly report and exits with 0 when called.
+verify_links() {
+  ok=0; mismatch=0; missing=0; exists_not_symlink=0; parent_ok=0
+
+  log "Checking top-level dotfiles..."
+  for f in .editorconfig .gitignore .hushlogin .prettierrc .zshrc; do
+    tgt="$HOME/$f"
+    repo_src="$REPO_ROOT/$f"
+    if [ -L "$tgt" ]; then
+      link_raw="$(readlink "$tgt")"
+      if [ "${link_raw#/}" = "$link_raw" ]; then
+        link_abs="$(realpath_f "$(dirname "$tgt")/$link_raw")"
+      else
+        link_abs="$(realpath_f "$link_raw")"
+      fi
+      if [ "$link_abs" = "$(realpath_f "$repo_src")" ]; then
+        log "OK       : $tgt -> $link_raw"
+        ok=$((ok+1))
+      else
+        warn "MISMATCH : $tgt -> $link_raw (resolves to $link_abs) expected $(realpath_f "$repo_src")"
+        mismatch=$((mismatch+1))
+      fi
+    elif [ -e "$tgt" ]; then
+      warn "EXISTS   : $tgt (not a symlink)"
+      exists_not_symlink=$((exists_not_symlink+1))
+    else
+      warn "MISSING  : $tgt"
+      missing=$((missing+1))
+    fi
+  done
+
+  log "\nChecking .config items..."
+  if [ -d "$REPO_ROOT/.config" ]; then
+    # gather unique top-level entries
+    # use a find to list direct children
+    for top in $(find "$REPO_ROOT/.config" -mindepth 1 -maxdepth 1 -printf '%f\n' 2>/dev/null); do
+      top_dest="$HOME/.config/$top"
+      repo_top_src="$REPO_ROOT/.config/$top"
+      if [ -L "$top_dest" ]; then
+        td_raw="$(readlink "$top_dest")"
+        if [ "${td_raw#/}" = "$td_raw" ]; then
+          td_abs="$(realpath_f "$(dirname "$top_dest")/$td_raw")"
+        else
+          td_abs="$(realpath_f "$td_raw")"
+        fi
+        if [ "$td_abs" = "$(realpath_f "$repo_top_src")" ]; then
+          log "PARENT OK : $top_dest -> $td_raw (children available via parent symlink)"
+          parent_ok=$((parent_ok+1))
+          continue
+        fi
+      fi
+
+      # parent not a symlink to repo: check children individually
+      find "$REPO_ROOT/.config/$top" -mindepth 1 -print0 | while IFS= read -r -d '' item; do
+        rel="${item#$REPO_ROOT/.config/}"
+        tgt="$HOME/.config/$rel"
+        if [ -L "$tgt" ]; then
+          link_raw="$(readlink "$tgt")"
+          if [ "${link_raw#/}" = "$link_raw" ]; then
+            link_abs="$(realpath_f "$(dirname "$tgt")/$link_raw")"
+          else
+            link_abs="$(realpath_f "$link_raw")"
+          fi
+          if [ "$link_abs" = "$(realpath_f "$item")" ]; then
+            log "OK       : $tgt -> $link_raw"
+            ok=$((ok+1))
+          else
+            warn "MISMATCH : $tgt -> $link_raw (resolves to $link_abs) expected $(realpath_f "$item")"
+            mismatch=$((mismatch+1))
+          fi
+        elif [ -e "$tgt" ]; then
+          warn "EXISTS   : $tgt (not a symlink)"
+          exists_not_symlink=$((exists_not_symlink+1))
+        else
+          warn "MISSING  : $tgt"
+          missing=$((missing+1))
+        fi
+      done
+    done
+  else
+    log ".config not present in repo"
+  fi
+
+  log "\nSummary:"
+  log "  OK: $ok"
+  log "  Parent-symlink OK: $parent_ok"
+  log "  MISMATCH: $mismatch"
+  log "  EXISTS but not symlink: $exists_not_symlink"
+  log "  MISSING: $missing"
+  return 0
+}
 
 ## is_ancestor parent child -> returns 0 if parent is an ancestor of child
 is_ancestor() { case "$2" in "$1"|"$1"/*) return 0;; *) return 1;; esac }
@@ -108,7 +217,14 @@ safe_link() {
 
   # If dest is a symlink, replace it when it points elsewhere
   if [ -L "$dest" ]; then
-    cur="$(readlink "$dest")"; cur_abs="$(realpath_f "$(dirname "$dest")/$cur")"
+    cur="$(readlink "$dest")"
+    # If readlink returned an absolute path, resolve it directly. When it
+    # returns a relative path, resolve it against the symlink's directory.
+    if [ "${cur#/}" = "$cur" ]; then
+      cur_abs="$(realpath_f "$(dirname "$dest")/$cur")"
+    else
+      cur_abs="$(realpath_f "$cur")"
+    fi
     [ "$cur_abs" = "$src_abs" ] && { log "Already: $dest -> $cur"; return 0; }
     rm -f "$dest" && ln -s "$src" "$dest" && { log "Replaced symlink: $dest -> $src"; return 0; } || { err "Failed link"; return 1; }
   fi
@@ -147,6 +263,11 @@ if [ -f "$BREWFILE" ]; then
   fi
 fi
 
+if [ "$VERIFY" = "yes" ]; then
+  verify_links
+  exit 0
+fi
+
 log "Symlinking top-level dotfiles"
 # Top-level dotfiles -- keep this list small and explicit for readability
 for f in .{editorconfig,gitignore,hushlogin,prettierrc,zshrc}; do
@@ -167,6 +288,27 @@ if [ -d "$REPO_ROOT/.config" ]; then
       # Skip the github-copilot directory itself (we'll handle its contents)
       if [ "$rel" = "artificial-intelligence/github-copilot" ]; then
         continue
+      fi
+
+      # If the top-level target under $HOME/.config is already a symlink that
+      # points into the repo (eg. ~/.config/homebrew -> repo/.config/homebrew),
+      # then its children are already available via that symlink. In that case
+      # skip creating child links to avoid writing into the repository and
+      # remove noisy warnings.
+      top="${rel%%/*}"
+      top_dest="$HOME/.config/$top"
+      if [ -L "$top_dest" ]; then
+        # Resolve the symlink target (handle relative and absolute readlink)
+        td_raw="$(readlink "$top_dest")"
+        if [ "${td_raw#/}" = "$td_raw" ]; then
+          td_abs="$(realpath_f "$(dirname "$top_dest")/$td_raw")"
+        else
+          td_abs="$(realpath_f "$td_raw")"
+        fi
+        if [ "$td_abs" = "$REPO_REALPATH/.config/$top" ]; then
+          # Parent already points to repo; child is available. Skip silently.
+          continue
+        fi
       fi
 
       if [[ "$rel" == artificial-intelligence/github-copilot/* ]]; then

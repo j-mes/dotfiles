@@ -213,6 +213,26 @@ You should see a non-empty value if integration succeeded.
 
 If the `code` CLI is missing, install it from VS Code: Command Palette → “Shell Command: Install 'code' command in PATH”.
 
+## Verification
+
+`install.sh` now includes a `--verify` flag that checks the repository is correctly linked into your home directory without making any changes. The verifier inspects:
+
+-   Top-level dotfiles (`.editorconfig`, `.gitignore`, `.hushlogin`, `.prettierrc`, `.zshrc`) — each must be a symlink resolving to the corresponding file in the repository.
+-   Entries under `.config/` — a top-level `~/.config/<name>` symlink that points to `repo/.config/<name>` is treated as the source of truth and accepted (children are available through the parent symlink).
+
+Usage:
+
+```zsh
+cd ~/Developer/dotfiles
+# Run verification (safe; makes no changes)
+zsh ./install.sh --verify
+```
+
+Notes:
+
+-   The command prints a human-friendly report listing OK/MISMATCH/EXISTS/MISSING items and a short summary.
+-   The verifier exits with code `0` currently even if mismatches are found; if you prefer a non-zero exit code on failures, open an issue or request and I can make the verifier return a failure code when any mismatch/missing item is detected.
+
 ### Private / Untracked Work Configuration (`work.zsh`)
 
 You can keep sensitive or workplace-specific configuration in an untracked file:
