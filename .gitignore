@@ -5,3 +5,5 @@ Thumbs.db
 
 # Untracked per-machine / private overrides
 .config/oh-my-zsh/work.zsh
+
+.gitconfig
