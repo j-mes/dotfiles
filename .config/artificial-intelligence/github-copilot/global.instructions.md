@@ -5,8 +5,8 @@ applyTo: '**/*'
 
 # Global Conventions
 
-Use British English in all human-facing text (`organisation`, `colour`, `optimise`).
-Write code that future you can understand at 3 a.m. — clear, explicit, and intentional.
+-   Use British English in all human-facing text (`organisation`, `colour`, `optimise`).
+-   Write code that future you can understand at 3 a.m. — clear, explicit, and intentional.
 
 ## General Rules
 
