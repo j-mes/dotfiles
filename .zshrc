@@ -24,7 +24,9 @@ source $ZSH/oh-my-zsh.sh
 eval "$(starship init zsh)"
 
 # fzf integration (key bindings + completion)
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] \
+	&& source ~/.fzf.zsh \
+	|| { [ -x "$(command -v fzf 2>/dev/null)" ] && source <(fzf --zsh); }
 
 # Environment exports (PATH, toolchain managers, etc.)
 [ -f "$ZSH_CUSTOM/exports.zsh" ] && source "$ZSH_CUSTOM/exports.zsh"
