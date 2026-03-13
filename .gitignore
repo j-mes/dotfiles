@@ -4,6 +4,13 @@
 Thumbs.db
 
 # Untracked per-machine / private overrides
-.config/oh-my-zsh/work.zsh
+.config/oh-my-zsh/local.zsh
+
+# Local app state not managed by this repo
+.config/gh/
+.config/github-copilot/
+.config/raycast/
+.config/zed/*
+!.config/zed/settings.json
 
 .gitconfig

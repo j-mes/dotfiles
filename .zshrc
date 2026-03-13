@@ -1,35 +1,27 @@
 #!/bin/zsh
-# ---------------------------------------------------------------------------
-# Zsh Configuration
-# Loads Oh My Zsh, plugins, prompt, fuzzy finder, environment exports, and
-# optional machine / private overrides. Keep this file lean; put logic into
-# dedicated files under .config/oh-my-zsh/.
-# ---------------------------------------------------------------------------
 
-# Core paths / locations
-export ZSH=~/.oh-my-zsh
-ZSH_CUSTOM=~/.config/oh-my-zsh
-# Theme & plugin selection
+export ZSH="$HOME/.oh-my-zsh"
+export ZSH_CUSTOM="$HOME/.config/oh-my-zsh"
+
 ZSH_THEME="robbyrussell"
-# Enable plugins
 plugins=(git)
 
-# Machine-specific / optional integrations (VS Code, host tweaks, etc.)
+source "$ZSH/oh-my-zsh.sh"
+
+[ -f "$ZSH_CUSTOM/exports.zsh" ] && source "$ZSH_CUSTOM/exports.zsh"
+[ -f "$ZSH_CUSTOM/aliases.zsh" ] && source "$ZSH_CUSTOM/aliases.zsh"
 [ -f "$ZSH_CUSTOM/machine.zsh" ] && source "$ZSH_CUSTOM/machine.zsh"
 
-# Framework & prompt
-source $ZSH/oh-my-zsh.sh
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
-# Starship prompt (fast, configurable)
-eval "$(starship init zsh)"
+if [ -f "$HOME/.fzf.zsh" ]; then
+  source "$HOME/.fzf.zsh"
+elif command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
 
-# fzf integration (key bindings + completion)
-[ -f ~/.fzf.zsh ] \
-	&& source ~/.fzf.zsh \
-	|| { [ -x "$(command -v fzf 2>/dev/null)" ] && source <(fzf --zsh); }
-
-# Environment exports (PATH, toolchain managers, etc.)
-[ -f "$ZSH_CUSTOM/exports.zsh" ] && source "$ZSH_CUSTOM/exports.zsh"
-
-# Private / untracked overrides (git-ignored)
-[ -f "$ZSH_CUSTOM/work.zsh" ] && source "$ZSH_CUSTOM/work.zsh"
+if [ -f "$ZSH_CUSTOM/local.zsh" ]; then
+  source "$ZSH_CUSTOM/local.zsh"
+fi
